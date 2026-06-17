@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.9-slim
+FROM python:3.10-slim
 
 # Install system dependencies (ffmpeg is required by yt-dlp and whisper)
 RUN apt-get update && apt-get install -y \
@@ -15,6 +15,9 @@ COPY requirements.txt .
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Overwrite PyPI yt-dlp with the bleeding-edge master branch to bypass YouTube blocks
+RUN pip install -U https://github.com/yt-dlp/yt-dlp/archive/master.zip
 
 # Copy the rest of the application
 COPY . .
