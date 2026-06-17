@@ -81,27 +81,29 @@ YouTube URL
 ```
 YouTube-Sports-Analyzer/
 │
-├── app.py                        # Flask app: routes, SSE stream, pipeline runner
-├── youtube_sports_analyzer.py    # CLI entry point
+├── run.py                        # Single entry point to run Web App or CLI
 ├── requirements.txt              # Python dependencies
+├── README.md                     # This file
 │
-├── modules/
+├── src/
 │   ├── __init__.py
-│   ├── downloader.py             # YouTube audio download via yt-dlp
-│   ├── transcriber.py            # Whisper transcription with anti-hallucination params
-│   ├── preprocessor.py           # Text normalization and sentence splitting
-│   ├── event_detector.py         # 4-Tier hybrid event detection engine
-│   ├── summarizer.py             # Results aggregation and narrative generation
-│   └── reporter.py               # Report output (console + .txt file)
+│   ├── app.py                    # Flask app: routes, SSE stream
+│   ├── cli.py                    # CLI entry point logic
+│   ├── modules/
+│   │   ├── downloader.py         # YouTube audio download via yt-dlp
+│   │   ├── transcriber.py        # Whisper transcription
+│   │   ├── preprocessor.py       # Text normalization
+│   │   ├── event_detector.py     # 4-Tier hybrid event detection engine
+│   │   ├── summarizer.py         # Results aggregation
+│   │   └── reporter.py           # Report output (console + .txt file)
+│   ├── static/
+│   │   ├── app.js                # Frontend SSE client and UI logic
+│   │   └── style.css             # Styling
+│   └── templates/
+│       └── index.html            # Main web UI
 │
-├── static/
-│   ├── app.js                    # Frontend SSE client and UI logic
-│   └── style.css                 # Styling
-│
-├── templates/
-│   └── index.html                # Main web UI
-│
-└── reports/                      # Auto-generated analysis reports (gitignored)
+├── data/                         # Audio files and datasets
+└── tests/                        # Unit and integration tests
 ```
 
 ---
@@ -132,10 +134,10 @@ pip install -r requirements.txt
 
 > ⚠️ **Note:** PyTorch (`torch`) may require a specific install command depending on your system. Visit [pytorch.org](https://pytorch.org/get-started/locally/) if you encounter issues.
 
-### Running the App
+### Running the App (Web Interface)
 
 ```bash
-python app.py
+python run.py
 ```
 
 Then open your browser at: **http://localhost:5000**
@@ -143,7 +145,7 @@ Then open your browser at: **http://localhost:5000**
 ### Running via CLI
 
 ```bash
-python youtube_sports_analyzer.py
+python run.py cli --url "https://youtube.com/..."
 ```
 
 ---

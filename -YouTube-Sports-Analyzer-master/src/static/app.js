@@ -38,10 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: formData
             });
 
-            if (!response.ok) throw new Error("Server failed to start analysis.");
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || "Server failed to start analysis.");
+            }
 
             // Start Listening for SSE
-            startStreaming();
+            startStreaming(data.session_id);
 
         } catch (err) {
             showError(err.message);
@@ -49,10 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function startStreaming() {
+    function startStreaming(sessionId) {
         if (eventSource) eventSource.close();
         
-        eventSource = new EventSource('/stream');
+        eventSource = new EventSource(`/stream?session_id=${sessionId}`);
         
         eventSource.onmessage = (event) => {
             const data = JSON.parse(event.data);

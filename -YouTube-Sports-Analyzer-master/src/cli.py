@@ -2,12 +2,12 @@ import argparse
 import sys
 import os
 import logging
-from modules.downloader import download_audio
-from modules.transcriber import transcribe_audio
-from modules.preprocessor import preprocess_transcript
-from modules.event_detector import detect_events
-from modules.summarizer import generate_summary
-from modules.reporter import generate_report
+from src.modules.downloader import download_audio
+from src.modules.transcriber import transcribe_audio
+from src.modules.preprocessor import preprocess_transcript
+from src.modules.event_detector import detect_events
+from src.modules.summarizer import generate_summary
+from src.modules.reporter import generate_report
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

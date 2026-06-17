@@ -20,12 +20,14 @@ def _build_command(youtube_url, output_path, ffmpeg_exe, browser=None):
         "--ffmpeg-location", ffmpeg_exe,
         "--output", output_path.replace(".wav", ".%(ext)s"),
         "--no-playlist",
+        "--match-filter", "duration <= 1200",
         "--socket-timeout", "30",
         "--retries", "3",
         "--add-header", "Accept-Language:en-US,en;q=0.9",
     ]
     if browser:
         cmd += ["--cookies-from-browser", browser]
+    cmd.append("--")
     cmd.append(youtube_url)
     return cmd
 
