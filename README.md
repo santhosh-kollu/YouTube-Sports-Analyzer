@@ -1,3 +1,11 @@
+---
+title: YouTube Sports Analyzer
+emoji: 🏟️
+colorFrom: blue
+colorTo: green
+sdk: docker
+pinned: false
+---
 # 🏟️ YouTube Sports Commentary Analyzer
 
 A Flask-based web application that analyzes YouTube sports commentary videos using a multi-tier NLP pipeline. It downloads audio, transcribes it with OpenAI Whisper, and detects key match events (goals, fouls, cards, saves, and more) — all in real time via a live progress stream.
