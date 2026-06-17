@@ -235,3 +235,10 @@ librosa
 ## 📄 License
 
 This project is for academic and educational purposes.
+
+---
+
+## 👨‍💻 Developer Info
+
+- **Developer:** santhosh kollu
+- **Contact:** [kollusanthosh01@gmail.com](mailto:kollusanthosh01@gmail.com)
