@@ -1,0 +1,10 @@
+openai-whisper
+yt-dlp
+imageio-ffmpeg
+soundfile
+numpy
+scikit-learn
+flask
+python-pptx
+torch
+librosa

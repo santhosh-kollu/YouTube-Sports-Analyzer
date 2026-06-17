@@ -1,0 +1,38 @@
+# Audio / Video files (large binaries)
+*.wav
+*.mp3
+*.mp4
+*.webm
+*.m4a
+*.ogg
+*.flac
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# Environment variables
+.env
+
+# Reports output (generated at runtime)
+reports/*.json
+reports/*.txt
+reports/*.html
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo

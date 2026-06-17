@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Sports Commentary Analyzer</title>
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="overlay"></div>
+    <main class="container">
+        <!-- Header -->
+        <header class="hero">
+            <h1 class="glow-text">YouTube <span class="accent-text">Sports</span> Analyzer</h1>
+            <p class="subtitle">Extracting game intelligence from commentary using Adaptive NLP & Machine Learning.</p>
+        </header>
+
+        <!-- Input Section -->
+        <section class="input-card card">
+            <div class="input-wrapper">
+                <i class="fab fa-youtube yt-icon"></i>
+                <input type="text" id="youtube-url" placeholder="Paste YouTube link here... (e.g., Chelsea vs Liverpool)" autocomplete="off">
+                <select id="whisper-model">
+                    <option value="tiny">Tiny (Fast)</option>
+                    <option value="base" selected>Base (Balanced)</option>
+                    <option value="small">Small (Better)</option>
+                    <option value="medium">Medium (Slow/Best)</option>
+                </select>
+                <button id="analyze-btn">
+                    <span class="btn-text">Analyze</span>
+                    <i class="fas fa-bolt-lightning btn-icon"></i>
+                    <div class="btn-loader hidden"></div>
+                </button>
+            </div>
+        </section>
+
+        <!-- Pipeline Progress -->
+        <section id="pipeline-status" class="pipeline-grid hidden">
+            <div class="pipeline-step" data-step="download">
+                <div class="step-icon"><i class="fas fa-download"></i></div>
+                <div class="step-label">Download</div>
+                <div class="step-status">Pending</div>
+            </div>
+            <div class="pipeline-step" data-step="transcribe">
+                <div class="step-icon"><i class="fas fa-microphone-lines"></i></div>
+                <div class="step-label">Transcribe</div>
+                <div class="step-status">Pending</div>
+            </div>
+            <div class="pipeline-step" data-step="preprocess">
+                <div class="step-icon"><i class="fas fa-broom"></i></div>
+                <div class="step-label">Preprocess</div>
+                <div class="step-status">Pending</div>
+            </div>
+            <div class="pipeline-step" data-step="detect">
+                <div class="step-icon"><i class="fas fa-magnifying-glass-chart"></i></div>
+                <div class="step-label">Detect</div>
+                <div class="step-status">Pending</div>
+            </div>
+            <div class="pipeline-step" data-step="summarize">
+                <div class="step-icon"><i class="fas fa-file-invoice"></i></div>
+                <div class="step-label">Summarize</div>
+                <div class="step-status">Pending</div>
+            </div>
+        </section>
+
+        <!-- Error Message -->
+         <div id="error-box" class="error-toast hidden">
+            <i class="fas fa-circle-exclamation"></i>
+            <span id="error-msg">Pipeline error occurred.</span>
+         </div>
+
+        <!-- Results Section (Hidden until done) -->
+        <div id="results-view" class="hidden">
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-total-events">0</div>
+                    <div class="stat-label">Total Events</div>
+                    <div class="stat-trend"><i class="fas fa-chart-line"></i> +12% vs Avg</div>
+                </div>
+                <div class="stat-box accent">
+                    <div class="stat-value" id="stat-goals">0</div>
+                    <div class="stat-label">Goals</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-saves">0</div>
+                    <div class="stat-label">Keeper Saves</div>
+                </div>
+                <div class="stat-box alert">
+                    <div class="stat-value" id="stat-cards">0</div>
+                    <div class="stat-label">Total Cards</div>
+                </div>
+            </div>
+
+            <!-- Main Layout Grid -->
+             <div class="results-layout">
+                <!-- Left Column: Frequency & Narrative -->
+                 <div class="col-left">
+                    <div class="card result-card">
+                        <h3 class="card-title"><i class="fas fa-chart-bar"></i> Event Frequency</h3>
+                        <div id="frequency-list" class="frequency-list">
+                            <!-- Bars dynamic -->
+                        </div>
+                    </div>
+
+                    <div class="card result-card narrative-card">
+                        <h3 class="card-title"><i class="fas fa-comment-dots"></i> Narrative Summary</h3>
+                        <p id="narrative-text" class="narrative-p"></p>
+                    </div>
+
+                    <div class="card result-card">
+                        <h3 class="card-title"><i class="fas fa-star"></i> Key Moments</h3>
+                        <div id="key-moments-list" class="moments-list"></div>
+                    </div>
+                 </div>
+
+                 <!-- Right Column: Timeline -->
+                 <div class="col-right">
+                    <div class="card result-card timeline-card">
+                        <h3 class="card-title"><i class="fas fa-clock"></i> Match Timeline</h3>
+                        <div id="timeline-list" class="timeline-container"></div>
+                    </div>
+                 </div>
+             </div>
+             
+             <!-- Raw Transcript Card -->
+              <div class="card result-card transcript-card">
+                <h3 class="card-title"><i class="fas fa-quote-left"></i> Full Commentary Transcript</h3>
+                <div id="raw-transcript-view" class="transcript-scroll"></div>
+              </div>
+
+              <!-- Evaluation Metrics Card -->
+              <div class="card result-card" id="eval-card" style="margin-top:24px;">
+                <h3 class="card-title"><i class="fas fa-flask"></i> Evaluation Metrics <span style="font-size:0.75rem;font-weight:400;color:var(--text-secondary);margin-left:8px;">(Auto-computed from this video)</span></h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:16px;">
+                  <div class="stat-box" style="text-align:left;padding:18px;">
+                    <div style="font-size:0.75rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Tier 1 — Keyword Phrases</div>
+                    <div class="stat-value" id="eval-tier1">—</div>
+                    <div class="stat-label" id="eval-tier1-pct">of total detections</div>
+                  </div>
+                  <div class="stat-box accent" style="text-align:left;padding:18px;">
+                    <div style="font-size:0.75rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Tier 2 — TF-IDF Cosine ML</div>
+                    <div class="stat-value" id="eval-tier2">—</div>
+                    <div class="stat-label" id="eval-tier2-pct">of total detections</div>
+                  </div>
+                  <div class="stat-box" style="text-align:left;padding:18px;">
+                    <div style="font-size:0.75rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Avg ML Confidence (Tier 2)</div>
+                    <div class="stat-value" id="eval-avg-conf">—</div>
+                    <div class="stat-label">above 65% threshold</div>
+                  </div>
+                  <div class="stat-box alert" style="text-align:left;padding:18px;">
+                    <div style="font-size:0.75rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Neutral Suppression</div>
+                    <div class="stat-value" id="eval-suppressed">—</div>
+                    <div class="stat-label">sentences auto-filtered as neutral</div>
+                  </div>
+                </div>
+              </div>
+        </div>
+    </main>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
