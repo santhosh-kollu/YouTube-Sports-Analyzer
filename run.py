@@ -19,5 +19,5 @@ if __name__ == "__main__":
             
         run_pipeline(args.url, args.model, args.output, args.demo)
     else:
-        # Run Flask web app by default
-        app.run(debug=False, port=5000)
+        # Run Flask web app by default (Hugging Face Spaces uses port 7860)
+        app.run(host="0.0.0.0", port=7860, debug=False)
