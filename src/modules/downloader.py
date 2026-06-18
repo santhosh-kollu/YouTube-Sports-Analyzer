@@ -60,13 +60,13 @@ def download_audio(youtube_url, output_path="audio_input.wav"):
     except subprocess.CalledProcessError as e:
         err = e.stderr or str(e)
         logger.warning(f"Download attempt failed: {err}")
-        raise Exception("Download failed. Could be restricted, a live stream, or over the 20-minute limit.")
+        raise Exception(f"[yt-dlp Raw Error]: {err}")
         
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
-        raise Exception("Download failed due to an unexpected error. Please try again.")
+        raise Exception(f"[yt-dlp Unexpected Error]: {str(e)}")
 
-    raise Exception("Download failed. Could be restricted, a live stream, or over the 20-minute limit.")
+    raise Exception("Download failed, but no exact error was captured.")
 
 if __name__ == "__main__":
     test_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
