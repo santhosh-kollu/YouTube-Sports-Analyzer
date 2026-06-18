@@ -38,6 +38,18 @@
                     <div class="btn-loader hidden"></div>
                 </button>
             </div>
+            
+            <div style="text-align: center; margin: 20px 0; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px;">
+                <span style="background: var(--bg-card); padding: 0 15px;">OR BYPASS YOUTUBE ENTIRELY</span>
+            </div>
+            
+            <div class="file-upload-wrapper" style="display: flex; gap: 10px; align-items: center; justify-content: center;">
+                <input type="file" id="audio-file" accept="audio/*,video/*" style="display: none;">
+                <label for="audio-file" class="upload-btn" style="cursor: pointer; padding: 14px 28px; background: rgba(0, 123, 255, 0.1); border: 1px dashed rgba(0, 123, 255, 0.5); border-radius: 8px; color: #fff; transition: all 0.2s; font-weight: 500;">
+                    <i class="fas fa-file-upload" style="margin-right: 8px;"></i> Upload Local Audio/Video File
+                </label>
+                <span id="file-name-display" style="color: var(--accent); font-size: 0.9rem; margin-left: 10px;"></span>
+            </div>
         </section>
 
         <!-- Pipeline Progress -->

@@ -25,7 +25,7 @@ progress_queues = {}
 active_jobs = 0
 MAX_JOBS = 2
 
-def run_analysis_pipeline(url, model_size, session_id):
+def run_analysis_pipeline(url, file_path, model_size, session_id):
     """
     Background worker that runs the full pipeline and pushes status updates to SSE queue.
     """
@@ -35,16 +35,20 @@ def run_analysis_pipeline(url, model_size, session_id):
         return
 
     try:
-        # Step 1: Download
-        q.put({"step": "download", "status": "active", "msg": "Downloading audio from YouTube..."})
-        audio_output_path = f"data/audio_{session_id}.wav"
-        
-        audio_path = download_audio(url, output_path=audio_output_path)
-        q.put({"step": "download", "status": "done", "msg": "Audio downloaded successfully."})
+        audio_output_path = file_path
+        if url:
+            # Step 1: Download
+            q.put({"step": "download", "status": "active", "msg": "Downloading audio from YouTube..."})
+            audio_output_path = f"data/audio_{session_id}.wav"
+            
+            download_audio(url, output_path=audio_output_path)
+            q.put({"step": "download", "status": "done", "msg": "Audio downloaded successfully."})
+        else:
+            q.put({"step": "download", "status": "done", "msg": "Local file processed successfully."})
         
         # Step 2: Transcribe
         q.put({"step": "transcribe", "status": "active", "msg": "Transcribing audio (Whiser model: {})...".format(model_size)})
-        whisper_result = transcribe_audio(audio_path, model_size)
+        whisper_result = transcribe_audio(audio_output_path, model_size)
         if not whisper_result:
             raise Exception("Transcription failed.")
         q.put({"step": "transcribe", "status": "done", "msg": "Transcription complete."})
@@ -71,18 +75,53 @@ def run_analysis_pipeline(url, model_size, session_id):
         # Always decrement active jobs when thread finishes
         active_jobs -= 1
         
-        # Securely delete the .wav file to prevent storage exhaustion
-        audio_path_to_delete = f"data/audio_{session_id}.wav"
-        if os.path.exists(audio_path_to_delete):
-            try:
-                os.remove(audio_path_to_delete)
-                logger.info(f"Cleaned up audio file: {audio_path_to_delete}")
-            except Exception as e:
-                logger.error(f"Failed to delete {audio_path_to_delete}: {e}")
+        # Securely delete the files to prevent storage exhaustion
+        paths_to_delete = [f"data/audio_{session_id}.wav", file_path]
+        for p in paths_to_delete:
+            if p and os.path.exists(p):
+                try:
+                    os.remove(p)
+                    logger.info(f"Cleaned up file: {p}")
+                except Exception as e:
+                    logger.error(f"Failed to delete {p}: {e}")
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/api/upload', methods=['POST'])
+def upload():
+    global active_jobs
+    
+    # DoS Protection: Check concurrent limits
+    if active_jobs >= MAX_JOBS:
+        return jsonify({"error": "Server is extremely busy right now (Max 2 concurrent jobs). Please try again in a few minutes!"}), 503
+        
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded."}), 400
+        
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file."}), 400
+        
+    model = request.form.get('model', 'tiny')
+    
+    active_jobs += 1
+    session_id = str(uuid.uuid4())
+    progress_queues[session_id] = queue.Queue()
+    
+    # Save the file securely
+    os.makedirs("data", exist_ok=True)
+    ext = os.path.splitext(file.filename)[1]
+    file_path = f"data/upload_{session_id}{ext}"
+    file.save(file_path)
+    
+    # Start pipeline in separate thread
+    thread = threading.Thread(target=run_analysis_pipeline, args=(None, file_path, model, session_id))
+    thread.daemon = True
+    thread.start()
+    
+    return jsonify({"status": "started", "session_id": session_id})
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
@@ -106,7 +145,7 @@ def analyze():
     progress_queues[session_id] = queue.Queue()
     
     # Start pipeline in separate thread
-    thread = threading.Thread(target=run_analysis_pipeline, args=(url, model, session_id))
+    thread = threading.Thread(target=run_analysis_pipeline, args=(url, None, model, session_id))
     thread.daemon = True
     thread.start()
     

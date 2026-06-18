@@ -7,12 +7,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorBox = document.getElementById('error-box');
     const errorMsg = document.getElementById('error-msg');
 
+    const audioFileInput = document.getElementById('audio-file');
+    const fileNameDisplay = document.getElementById('file-name-display');
+
     let eventSource = null;
+
+    if (audioFileInput) {
+        audioFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileNameDisplay.innerText = e.target.files[0].name;
+                youtubeInput.value = ''; // Clear URL if file is selected
+            } else {
+                fileNameDisplay.innerText = '';
+            }
+        });
+    }
 
     analyzeBtn.addEventListener('click', async () => {
         const url = youtubeInput.value.trim();
-        if (!url) {
-            showError("Please enter a valid YouTube URL.");
+        const file = audioFileInput && audioFileInput.files.length > 0 ? audioFileInput.files[0] : null;
+
+        if (!url && !file) {
+            showError("Please enter a YouTube URL or upload an audio/video file.");
             return;
         }
 
@@ -24,16 +40,24 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Disable button
         analyzeBtn.disabled = true;
-        analyzeBtn.querySelector('.btn-text').innerText = "Processing...";
+        analyzeBtn.querySelector('.btn-text').innerText = file ? "Uploading..." : "Processing...";
         analyzeBtn.querySelector('.btn-loader').classList.remove('hidden');
         analyzeBtn.querySelector('.btn-icon').classList.add('hidden');
 
         try {
             const formData = new FormData();
-            formData.append('url', url);
             formData.append('model', modelSelect.value);
+            
+            let endpoint = '/analyze';
+            
+            if (file) {
+                formData.append('file', file);
+                endpoint = '/api/upload';
+            } else {
+                formData.append('url', url);
+            }
 
-            const response = await fetch('/analyze', {
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 body: formData
             });
