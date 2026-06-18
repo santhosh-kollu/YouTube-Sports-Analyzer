@@ -29,6 +29,20 @@ def _build_command(youtube_url, output_path, ffmpeg_exe):
         "--add-header", "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     ]
     
+    # Handle Cookies for Authentication Bypass
+    cookies_content = os.environ.get("YOUTUBE_COOKIES")
+    cookie_path = "/tmp/youtube_cookies.txt"
+    if cookies_content:
+        try:
+            with open(cookie_path, "w", encoding="utf-8") as f:
+                f.write(cookies_content)
+            cmd.extend(["--cookies", cookie_path])
+            logger.info("Using YouTube cookies from environment variables for authentication.")
+        except Exception as e:
+            logger.error(f"Failed to write cookies file: {e}")
+    else:
+        logger.warning("No YOUTUBE_COOKIES environment variable found. Downloads may fail due to bot checks.")
+    
     cmd.append("--")
     cmd.append(youtube_url)
     return cmd
