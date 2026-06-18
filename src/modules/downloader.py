@@ -22,8 +22,8 @@ def _build_command(youtube_url, output_path, ffmpeg_exe):
         "--retries", "5",
         
         # Anti-Bot / Anti-Throttle Bypasses:
-        "--extractor-args", "youtube:player_client=android", # Spoof Android client instead of Web
-        "--impersonate", "chrome", # Use curl_cffi to forge a Google Chrome TLS Fingerprint to bypass UNEXPECTED_EOF_WHILE_READING
+        "--extractor-args", "youtube:player_client=android,ios,tv", # Spoof Android/iOS/TV clients
+        "--impersonate", "chrome", # Use curl_cffi to forge a Google Chrome TLS Fingerprint
         "--legacy-server-connect", # Fix some SSL handshake errors
         "--no-check-certificate", # Ignore strict SSL checks if throttled
         "--add-header", "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -59,14 +59,14 @@ def download_audio(youtube_url, output_path="audio_input.wav"):
 
     except subprocess.CalledProcessError as e:
         err = e.stderr or str(e)
-        logger.warning(f"Download attempt failed: {err}")
-        raise Exception(f"[yt-dlp Raw Error]: {err}")
+        logger.warning(f"Download attempt failed: {err[-1000:]}") # Keep some logs on backend
+        raise Exception("Download failed. Could be restricted, a live stream, or over the 20-minute limit.")
         
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
-        raise Exception(f"[yt-dlp Unexpected Error]: {str(e)}")
+        raise Exception("Download failed due to an unexpected error. Please try again.")
 
-    raise Exception("Download failed, but no exact error was captured.")
+    raise Exception("Download failed. Could be restricted, a live stream, or over the 20-minute limit.")
 
 if __name__ == "__main__":
     test_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
