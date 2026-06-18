@@ -40,8 +40,6 @@ def run_analysis_pipeline(url, model_size, session_id):
         audio_output_path = f"data/audio_{session_id}.wav"
         
         audio_path = download_audio(url, output_path=audio_output_path)
-        if not audio_path:
-            raise Exception("Download failed. Could be restricted, a live stream, or over the 20-minute limit.")
         q.put({"step": "download", "status": "done", "msg": "Audio downloaded successfully."})
         
         # Step 2: Transcribe

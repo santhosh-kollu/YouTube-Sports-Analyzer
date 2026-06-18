@@ -57,14 +57,15 @@ def download_audio(youtube_url, output_path="audio_input.wav"):
             logger.warning(f"Output file not found after download attempt.")
 
     except subprocess.CalledProcessError as e:
-        err = e.stderr or ""
-        logger.warning(f"Download attempt failed: {err[-500:]}")
+        err = e.stderr or str(e)
+        logger.warning(f"Download attempt failed: {err}")
+        raise Exception(f"[yt-dlp Raw Error]: {err}")
         
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
+        raise Exception(f"[yt-dlp Unexpected Error]: {str(e)}")
 
-    logger.error("Download failed. Please check your internet connection or try a different video URL.")
-    return None
+    raise Exception("Download failed, but no exact error was captured.")
 
 if __name__ == "__main__":
     test_url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
