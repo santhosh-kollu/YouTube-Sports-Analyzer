@@ -17,7 +17,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Overwrite PyPI yt-dlp with the bleeding-edge master branch to bypass YouTube blocks
-RUN pip install -U https://github.com/yt-dlp/yt-dlp/archive/master.zip
+# Also install curl_cffi for TLS fingerprint impersonation
+RUN pip install -U https://github.com/yt-dlp/yt-dlp/archive/master.zip curl_cffi
 
 # Copy the rest of the application
 COPY . .
